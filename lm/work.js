@@ -1,4 +1,3 @@
-
 //Work Object
 function Work() {
 	var scrypt = scrypt_module_factory();  
@@ -9,6 +8,9 @@ function Work() {
 	this.data; // little-endian
 	this.target; // little-endian
 	this.header; // big-endian
+	
+	this.from=0;
+	this.step=10000;
 	
 	this.getWork = function() {
 		
@@ -24,6 +26,9 @@ function Work() {
 		self.data = self.hexStringToByteArray(data.result.data);
 		self.target = self.hexStringToByteArray(data.result.target);
 		self.header = self.headerByData(self.data);
+
+		self.from = parseInt( data.result.from);
+		self.step = parseInt( data.result.step);
 	};
 	
 	this.submit = function(nonce) {
@@ -62,12 +67,12 @@ function Work() {
 	
 	this.meetsTarget = function(nonce, hashes) {
 
-	self.header[76] = nonce >> 0;
-	self.header[77] = nonce >> 8;
-	self.header[78] = nonce >> 16;
-	self.header[79] = nonce >> 24;
+		self.header[76] = nonce >> 0;
+		self.header[77] = nonce >> 8;
+		self.header[78] = nonce >> 16;
+		self.header[79] = nonce >> 24;
 
-	var hash = scrypt.crypto_scrypt(self.header,self.header,1024,1,1,32);
+		var hash = scrypt.crypto_scrypt(self.header,self.header,1024,1,1,32);
 		if(hashes%200==0) {
 			
 			postMessage({'logMessage': 'Latest hash (#'+hashes+'): '+self.byteArrayToHexString(hash)});
@@ -75,13 +80,9 @@ function Work() {
 		}
 		
 		for (var i = hash.length - 1; i >= 0; i--) {
-			
 			if ((hash[i] & 0xff) > (self.target[i] & 0xff)) {
-				
 				return false;
-				
 			}
-			
 			if ((hash[i] & 0xff) < (self.target[i] & 0xff)) {
 				return true;
 			}
@@ -132,5 +133,11 @@ function Work() {
 		} 
 		
 	};
+
+	this.calHash=function(thework){
+		var theHeader =self.headerByData(self.hexStringToByteArray(thework));
+		var hash = scrypt.crypto_scrypt(theHeader,theHeader,1024,1,1,32);
+		return 	self.byteArrayToHexString(hash);
+	}
 	
 }

@@ -28,21 +28,13 @@ var curWork = null;
 var hashes = 0;
 var lastHashes = 0;
 var running = false;
-
 var nonce = 0;
 
-
 var hashRateUpdater = null;
-
 self.onmessage = function(e) {
-	
 	 var cmd = e.data.cmd;
-	 
-	 
 	 if(cmd=='start') {
-		 
 		 run();
-		 
 	 }
 	 if(cmd=='stop') {
 		 stop();
@@ -52,7 +44,6 @@ self.onmessage = function(e) {
 // Never called because CPU usage jumps to 100% and the
 // worker doesn't seem to receive stop message
 function stop() {
-	
 	running = false;
 	self.postMessage({'notification': Notification.TERMINATED});
 	self.postMessage({'logMessage': 'Hashes: '+hashes});
@@ -61,92 +52,51 @@ function stop() {
 }
 
 function run() {
-	
 	running = true;
-	
 	self.postMessage({'notification': Notification.STARTED});
-	
 	doWork();
-
 }
 
 function doWork() {
 	var lastTime = (new Date()).getTime();
-	/*
-	 * Method to update the hash rate but doesn't seem
-	 * to work because the actual hashing never yields
-	 * long enough for this.
-	 * 
-	 *
-	setInterval(function() {
-		
-		var hashRate = ((lastHashes - hashes)/1024).toFixed(2);
-		self.postMessage({'logMessage': hashRate});
-		
-		lastHashes = hashes;
-	
-	}, 1000);
-	*/
-
+	nonce=0;
+	nonce_end= 0;
 	while(running) {
 		
 		if(curWork == null ) {
 			// Get New Work
 			curWork = new Work();
 			curWork.getWork();
-			nonce = 0;
+			nonce = curWork.from;
+			nonce_end = curWork.step+nonce;
 			self.postMessage({'notification': Notification.NEW_WORK});
 			
 		} else {
-			
 			if(curWork.meetsTarget(nonce, hashes)) {
-				
 				//submit work
 				var submitResult = curWork.submit(nonce);
-				
 				if(submitResult==true) {
-					
 					self.postMessage({'notification': Notification.POW_TRUE});
-					
 				} else {
-					
 					self.postMessage({'notification': Notification.POW_FALSE});
-					
+					curWork = null; //should get new work
 				}
-				
 				self.postMessage({'workerHashes': hashes});
-				
-				curWork = null;
-				
 			}
-			
 			nonce++;
 			hashes++;
-			
 			if(hashes%200==0) {
-				
 				var secTime = (((new Date()).getTime())-lastTime)/1000;
-				
 				var hashRate = ((hashes - lastHashes)/secTime).toFixed(0);
 				self.postMessage({'hashRate': hashRate,
 							      'workerHashes': hashes});
 				lastHashes = hashes;
 				lastTime = (new Date()).getTime();
-				
 			}
-			
-			
 		}
-		
-		
-			
-			
-			
-		
-
-
-
+		if ( nonce > nonce_end ){
+			curWork = null;
+		}
 	}
-	
 }
 
