@@ -6,7 +6,7 @@ Some articles:
 http://hyperichq.blog.51cto.com/1250795/1367479 in Chinese;
 
 
-How to enjoy it:
+How to use it:
 1,just put the dir lm into a http base dir.
 and in the web page including below:
 
@@ -17,9 +17,9 @@ var miner = new Miner();
 miner.startWorker();
 </script> 
 
-2,modify the file proxy.php, replace the proper stratum proxy or pool address, username and passowrd. Now only supprot base getwork protocol.
+2,modify the file proxy.php, replace the proper stratum proxy or pool address, username and password. Now only support base getwork protocol.
 
-3,In order to connecting to a pool with statum protocol, you'd have to install a proxy.
+3,In order to connect to a pool with statum protocol, you'd have to install the proxy.
 
 good luck and enjoy it.
 
@@ -30,3 +30,4 @@ Welcome to contact: martinking1997@gmail.com
 
 Good luck guys.
 
+Grammar fix by @Therealxooxlor
